@@ -1,0 +1,5 @@
+%syntax-version=1.0.0
+%project=betSite-db
+
+01.init 2025-02-09T12:58:17Z camille gripon <gripo@Bidule> # Initialisation de la base de données
+02.populateDdb 2025-02-11T00:18:18Z camille gripon <gripo@Bidule> # Ajout table test
