@@ -18,7 +18,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-
+app.get('/', (req, res) => {
+  res.send('Backend en ligne !');
+});
 app.use("/api/matches", matchRoutes);
 app.use("/api/champions", championRoutes);
 app.use("/api/user", userRoutes);
