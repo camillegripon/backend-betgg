@@ -2,9 +2,12 @@
 import pool from '../config/db.js';
 
 // testController.js
+// testController.js
 export const testDB = async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT 1');
+    const client = await pool.connect();
+    const { rows } = await client.query('SELECT 1');
+    client.release();
     res.json({ success: true, data: rows });
   } catch (err) {
     console.error('Erreur de connexion:', err);
