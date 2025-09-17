@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import pkg from 'pg';
 import dns from 'dns';
 import dotenv from 'dotenv';
 
@@ -8,7 +8,7 @@ dotenv.config();
 dns.setDefaultResultOrder('ipv4first');
 
 // Variable pour stocker le pool de connexions
-let pool;
+const { Pool } = pkg;
 
 // Fonction pour initialiser le pool de connexions
 const initializePool = async () => {
