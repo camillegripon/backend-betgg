@@ -1,7 +1,7 @@
 // testController.js
-const pool = require('../db');
+import pool from '../db.js';
 
-exports.testDB = async (req, res) => {
+export const testDB = async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT 1 as test');
     res.json({ success: true, data: rows[0] });

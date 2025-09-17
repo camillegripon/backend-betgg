@@ -1,8 +1,7 @@
-// routes/test.js
-const express = require('express');
-const router = express.Router();
-const { testDB } = require('../controllers/testController');
+import { Router } from 'express';
+const router = Router();
+import { testDB } from '../controllers/testController.js';
 
 router.get('/test-db', testDB);
 
-module.exports = router;
+export default router; // Export par défaut
