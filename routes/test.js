@@ -1,6 +1,7 @@
 import { Router } from 'express';
 const router = Router();
-import { testDB, testDNS } from '../controllers/testController.js';
+import {testDB} from '../controllers/testController.js';
+import {testDNS}  from '../controllers/testDNSController.js';
 
 router.get('/test-db', testDB);
 router.get('/test-dns', testDNS);
