@@ -6,7 +6,7 @@ import userRoutes from "./routes/userRoutes.js"
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import betsRoutes from './routes/betRoutes.js';
-import testRoutes from './routes/test.js';
+
 
 const app = express();
 
@@ -17,8 +17,6 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
-
-app.use('/api', testRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend en ligne !');

@@ -1,44 +1,15 @@
-import pkg from 'pg';
-import dns from 'dns';
+import { Pool } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const { Pool } = pkg;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres.oejexfneznvyznjsyvlk:TtYC4NQTMmJnsJLQ@aws-1-eu-west-3.pooler.supabase.com:5432/postgres',
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
-// Force Node.js à utiliser IPv4 pour les requêtes DNS
-dns.setDefaultResultOrder('ipv4first');
-
-// Variable pour stocker le pool de connexions
-let pool;
-
-// Fonction pour initialiser le pool de connexions
-const initializePool = () => {
-  return new Promise((resolve, reject) => {
-    dns.lookup('db.oejexfneznvyznjsyvlk.supabase.co', { family: 4 }, (err, address) => {
-      if (err) {
-        console.error('Erreur DNS:', err);
-        reject(err);
-        return;
-      }
-      console.log('Adresse IPv4:', address);
-
-      pool = new Pool({
-        host: address,
-        user: 'postgres',
-        database: 'postgres',
-        password: 'TtYC4NQTMmJnsJLQ',
-        port: 5432,
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      });
-      resolve(pool);
-    });
-  });
-}
-
-// Initialiser le pool au démarrage
-await initializePool();
+console.log('Connexion à la base de données avec :', process.env.DATABASE_URL || 'aws-1-eu-west-3.pooler.supabase.com');
 
 export default pool;
