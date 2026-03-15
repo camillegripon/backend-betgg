@@ -6,7 +6,10 @@ import { verifyToken } from "../utils/token.js";
 const userRoutes = express.Router();
 
 userRoutes.post("/", inscription);
-userRoutes.post("/connexion", connexion);
+userRoutes.post("/connexion", (req, res, next) => {
+    console.log("connexion");
+    next();
+}, connexion);
 userRoutes.get("/check-auth", verifyToken, getNeekos);
 userRoutes.post("/logout", (req, res) => {
     res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
