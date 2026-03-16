@@ -1,43 +1,55 @@
 import pool from "../config/db.js";
 
-// ✅ Récupérer tous les matchs (avec filtres)
 export const getMatches = async (req, res) => {
     try {
         const { league } = req.query;
 
-        let query = `
-SELECT 
-    games.id_game,
-    games.bo,
-    games.winner_team,
-    matches.date_match AS match_date,
-    team1.name_team AS team1_name,
-    team2.name_team AS team2_name,
-    odds_team1.odds AS team1_odds,
-    odds_team2.odds AS team2_odds
-FROM games
-JOIN game_matches ON games.id_game = game_matches.id_game
-JOIN matches ON game_matches.id_match = matches.id_match AND matches.game_number = 1
-JOIN teams AS team1 ON matches.team1 = team1.id_team
-JOIN teams AS team2 ON matches.team2 = team2.id_team
-LEFT JOIN odds AS odds_team1 ON odds_team1.id_game = games.id_game AND odds_team1.id_team = team1.id_team
-LEFT JOIN odds AS odds_team2 ON odds_team2.id_game = games.id_game AND odds_team2.id_team = team2.id_team
+        const query = `
+            SELECT
+                g.id_game,
+                g.bo,
+                g.winner_team AS winner_team_id,
+                t_winner.name_team AS winner_team_name,
+                m.date_match AS match_date,
+                t1.name_team AS team1_name,
+                t1.id_team AS team1_id,
+                t2.name_team AS team2_name,
+                t2.id_team AS team2_id,
+                o1.odds AS team1_odds,
+                o2.odds AS team2_odds,
+                COUNT(CASE WHEN m.victoire = t1.id_team THEN 1 END) AS team1_victories,
+                COUNT(CASE WHEN m.victoire = t2.id_team THEN 1 END) AS team2_victories
+            FROM games g
+            JOIN game_matches gm ON g.id_game = gm.id_game
+            JOIN matches m ON gm.id_match = m.id_match
+            JOIN teams t1 ON m.team1 = t1.id_team
+            JOIN teams t2 ON m.team2 = t2.id_team
+            LEFT JOIN teams t_winner ON g.winner_team = t_winner.id_team
+            LEFT JOIN odds o1 ON o1.id_game = g.id_game AND o1.id_team = t1.id_team
+            LEFT JOIN odds o2 ON o2.id_game = g.id_game AND o2.id_team = t2.id_team
+            ${league ? "JOIN leagues l ON m.league = l.id_league" : ""}
+            GROUP BY g.id_game, t1.id_team, t2.id_team, m.date_match, t_winner.name_team, o1.odds, o2.odds
+            ORDER BY m.date_match DESC
         `;
 
-        let params = [];
-
-        if (league) {
-            query += " AND leagues.name_league = $1";
-            params.push(league);
-        }
-
+        const params = league ? [league] : [];
         const result = await pool.query(query, params);
-        res.json(result.rows);
+
+        // ✅ Formate les données pour le frontend
+        const matches = result.rows.map(row => ({
+            ...row,
+            match_date: row.match_date.toISOString(),
+            score: `${row.team1_victories || 0}-${row.team2_victories || 0}`
+        }));
+
+        res.json(matches);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "Erreur serveur pour trouver les matchs" });
+        console.error("Erreur getMatches:", err.message);
+        res.status(500).json({ error: "Erreur serveur" });
     }
 };
+
+
 
 
 export const addBO = async (req, res) => {
