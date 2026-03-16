@@ -23,7 +23,14 @@ export const inscription = async (req, res) => {
         );
 
         // 3. Envoie le token dans un cookie + les infos utilisateur de base
-        res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "Strict" });
+        // Pour l'inscription et la connexion, utilise cette configuration :
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', // ✅ Clé ici
+            maxAge: 3600000,
+        });
+
         res.status(201).json({
             message: "Inscription validée ! Vous êtes maintenant connecté.",
             user: { id_user: user.id_user, username: user.username, role: user.role, neekos: user.neekos }
@@ -53,7 +60,14 @@ export const connexion = async (req, res) => {
                 process.env.JWT_SECRET,
                 { expiresIn: "1h" }
             );
-            res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "Strict" });
+            // Pour l'inscription et la connexion, utilise cette configuration :
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', // ✅ Clé ici
+                maxAge: 3600000,
+            });
+
             res.json({
                 message: "Connexion réussie",
                 user: { id_user: user.id_user, username: user.username, role: user.role }
