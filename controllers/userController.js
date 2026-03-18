@@ -27,7 +27,7 @@ export const inscription = async (req, res) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', // ✅ Clé ici
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
             maxAge: 3600000,
         });
 
@@ -85,11 +85,11 @@ export const connexion = async (req, res) => {
 export const getNeekos = async (req, res) => {
     try {
         const id_user = req.user.id_user;
-        const query = `SELECT neekos FROM users WHERE id_user = $1`;
+        const query = "SELECT neekos, avatar FROM users WHERE id_user = $1";  // ✅ Requête SQL propre
         const result = await pool.query(query, [id_user]);
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: "Neekos non trouvés" });
+            return res.status(404).json({ error: "Utilisateur non trouvé" });
         }
 
         res.json({
@@ -97,13 +97,16 @@ export const getNeekos = async (req, res) => {
                 id_user: req.user.id_user,
                 username: req.user.username,
                 role: req.user.role,
-                neekos: result.rows[0].neekos
+                neekos: result.rows[0].neekos,
+                avatar: result.rows[0].avatar || "default.png"  // Fallback si null
             }
         });
     } catch (error) {
-        console.error("Erreur lors de la récupération des neekos", error);
-        res.status(500).json({ error: "Erreur serveur lors de la récupération des neekos" });
+        console.error("Erreur SQL:", error);
+        res.status(500).json({ error: "Erreur serveur" });
     }
 };
+
+
 
 export default { inscription, connexion, getNeekos };
