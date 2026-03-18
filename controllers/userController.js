@@ -107,6 +107,44 @@ export const getNeekos = async (req, res) => {
     }
 };
 
+export const updateAvatar = async (req, res) => {
+    try {
+        // 1. Récupérer l'ID de l'utilisateur depuis la requête
+        const id_user = req.user.id_user;
+        // 2. Récupérer le nouvel avatar depuis le body de la requête
+        const { avatar } = req.body;
+
+        // 3. Vérifier que l'avatar est fourni
+        if (!avatar) {
+            return res.status(400).json({ error: "L'avatar est requis." });
+        }
+
+        // 4. Mettre à jour l'avatar dans la base de données
+        const updateQuery = `
+            UPDATE users
+            SET avatar = $1
+            WHERE id_user = $2
+            RETURNING avatar;
+        `;
+        const result = await pool.query(updateQuery, [avatar, id_user]);
+
+        // 5. Vérifier si la mise à jour a réussi
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Utilisateur non trouvé." });
+        }
+
+        // 6. Retourner l'avatar mis à jour
+        res.status(200).json({
+            success: true,
+            avatar: result.rows[0].avatar,
+            message: "Avatar mis à jour avec succès."
+        });
+
+    } catch (error) {
+        console.error("Erreur SQL:", error);
+        res.status(500).json({ error: "Erreur serveur lors de la mise à jour de l'avatar." });
+    }
+};
 
 
-export default { inscription, connexion, getNeekos };
+export default { inscription, connexion, getNeekos, updateAvatar };
