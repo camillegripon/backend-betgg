@@ -1,5 +1,5 @@
 import express from "express";
-import { inscription, connexion, getNeekos, updateAvatar } from "../controllers/userController.js";
+import { inscription, connexion, getNeekos, updateAvatar, getBets } from "../controllers/userController.js";
 import { verifyToken } from "../utils/token.js";
 
 
@@ -16,6 +16,7 @@ userRoutes.post("/logout", (req, res) => {
     res.json({ message: "Déconnexion réussie" });
 });
 userRoutes.post("/update-avatar", verifyToken, updateAvatar);
+userRoutes.get("/getBets", verifyToken, getBets)
 
 
 

@@ -146,5 +146,48 @@ export const updateAvatar = async (req, res) => {
     }
 };
 
+export const getBets = async (req, res) => {
+    try {
+        // 1. Vérifier que req.user est défini par le middleware
+        if (!req.user || !req.user.id_user) {
+            return res.status(401).json({ error: "Non autorisé : utilisateur non authentifié." });
+        }
 
-export default { inscription, connexion, getNeekos, updateAvatar };
+        const id_user = req.user.id_user;
+
+        // 2. Récupérer les paris de l'utilisateur
+        const query = `
+            SELECT
+                bets.id_bet,
+                bets.amount,
+                bets.status,
+                bets.payout,
+                teams.name_team AS team_name,
+                games.id_game,
+                odds.odds
+            FROM bets
+            JOIN games ON bets.id_game = games.id_game
+            JOIN teams ON bets.id_team = teams.id_team
+            JOIN odds ON bets.id_game = odds.id_game AND bets.id_team = odds.id_team
+            WHERE bets.id_user = $1
+            ORDER BY bets.id_bet DESC;
+        `;
+
+        const result = await pool.query(query, [id_user]);
+
+        // 3. Retourner les paris trouvés
+        res.status(200).json({
+            success: true,
+            bets: result.rows,
+        });
+
+    } catch (error) {
+        console.error("Erreur SQL:", error);
+        res.status(500).json({ error: "Erreur serveur lors de la récupération des paris." });
+    }
+};
+
+
+
+
+export default { inscription, connexion, getNeekos, updateAvatar, getBets };
